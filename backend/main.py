@@ -20,7 +20,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "https://ai-teacher-copilot.vercel.app",
+        "https://ai-teacher-copilot-git-main-ismael-mwauchis-projects.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
