@@ -3,7 +3,7 @@ import { supabase } from "./lib/supabase";
 import { CBC, TOOLS } from "./data/constants";
 import LessonPlanner from "./components/features/LessonPlanner";
 import TeachingStrategies from "./components/features/TeachingStrategies";
-import AssessmentCreator from "./components/features/AssessmentCreater";
+import AssessmentCreator from "./components/features/AssessmentCreator";
 import Dashboard from "./components/Dashboard";
 import Auth from "./components/Auth";
 import "./App.css";

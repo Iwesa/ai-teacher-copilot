@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Result } from './ui/SharedUI'; // Re-use our awesome Markdown viewer!
+import { Result } from './ui/SharedUI';
 
 export default function Dashboard({ session }) {
   const [documents, setDocuments] = useState([]);

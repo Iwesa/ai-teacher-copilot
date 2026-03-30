@@ -1,13 +1,11 @@
 import { useState, useCallback, useMemo } from "react";
 import { CBC } from "../../data/constants";
 import { useTool } from "../../hooks/useTool";
-import { Sel, Txt, Btn, Spinner, ErrBox, Result } from "../ui/SharedUI";
+import { Sel, Txt, Btn, Spinner, ErrBox, Result } from '../ui/SharedUI';
 
-// FIX 1: Spelled as AssessmentCreator
-export default function AssessmentCreater({ session }) { 
+export default function AssessmentCreator({ session }) { 
   const [form, setForm] = useState({ level: "", grade: "", area: "", type: "", topic: "", outcomes: "" });
-  
-  // FIX 2: Destructured the 'status' variable from the hook
+
   const { loading, result, error, status, run, retry, timeout } = useTool();
 
   const updateForm = useCallback((key, value) => setForm(f => ({ ...f, [key]: value })), []);
@@ -48,7 +46,6 @@ export default function AssessmentCreater({ session }) {
         {loading ? "Generating…" : "✅ Create Assessment Tool"}
       </Btn>
       
-      {/* FIX 3: Pass the dynamic status and hide the spinner once text streams (!result) */}
       {loading && !result && <Spinner msg={status || "Building your assessment tool…"} onTimeout={timeout} />}
       {error && <ErrBox message={error} onRetry={retry} />}
       

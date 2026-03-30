@@ -77,7 +77,6 @@ export default function LessonPlanner({ session }) {
   );
 }
 const submit = () => {
-    // Basic frontend validation
     if (!form.level || !form.grade || !form.area || !form.topic) {
       alert("Please fill in all required fields (Level, Grade, Area, Topic).");
       return;
