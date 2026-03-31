@@ -128,7 +128,7 @@ export async function copyText(text) {
 }
 
 export async function saveToDatabase(title, type, content, metadata, userId) {
-  const res = await fetch("${import.meta.env.VITE_API_URL}/api/db/save", {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/db/save`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ title, type, content, metadata, user_id: userId }),
