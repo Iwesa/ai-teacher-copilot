@@ -1,76 +1,66 @@
 import { useState, useCallback, useMemo } from "react";
 import { CBC } from "../../data/constants";
 import { useTool } from "../../hooks/useTool";
-import { Sel, Txt, Btn, Spinner, ErrBox, Result } from '../ui/SharedUI';
+import { Sel, Txt, Btn } from "../ui/SharedUI";
+import GeneratorLayout from "../ui/GeneratorLayout";
 
-export default function AssessmentCreator({ session }) { 
-  const [form, setForm] = useState({ level: "", grade: "", area: "", type: "", topic: "", outcomes: "" });
-
-  const { loading, result, error, status, run, retry, timeout } = useTool();
+export default function AssessmentCreator({ session }) {
+  const [form, setForm] = useState({ level: "", grade: "", area: "", topic: "", assessment_type: "Written Quiz", outcomes: "" });
+  const { loading, result, error, run, retry, timeout } = useTool();
 
   const updateForm = useCallback((key, value) => setForm(f => ({ ...f, [key]: value })), []);
   const handleLevelChange = useCallback((v) => setForm(f => ({ ...f, level: v, grade: "", area: "" })), []);
 
   const grades = useMemo(() => form.level ? CBC.levels[form.level]?.grades : [], [form.level]);
   const areas = useMemo(() => form.level ? CBC.levels[form.level]?.areas : [], [form.level]);
+  
+  // Standard CBC Assessment Types
+  const assessmentTypes = ["Written Quiz", "Observation Checklist", "Oral Questions", "Project Rubric", "Portfolio Guide"];
 
-  const submit = () => {
-    if (!form.type.trim() || !form.topic.trim()) { 
-      alert("Please select an Assessment Type and Topic."); 
-      return; 
-    }
-
+  const executeRun = (refinementPrompt = null) => {
     run("/api/generate/assessment", {
       level: form.level || "Not specified",
       grade: form.grade || "Not specified",
       area: form.area || "Not specified",
-      type: form.type,
       topic: form.topic,
-      outcomes: form.outcomes
+      assessment_type: form.assessment_type,
+      outcomes: form.outcomes,
+      current_draft: result,
+      refinement_prompt: refinementPrompt
     });
   };
 
+  const submit = () => {
+    if (!form.topic.trim()) return alert("Please enter a Topic or Concept.");
+    executeRun();
+  };
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+    <GeneratorLayout
+      loading={loading} error={error} result={result} retry={retry} timeout={timeout}
+      spinnerMsg="Designing assessment tools…"
+      title="📋 Assessment Tool"
+      docType="assessment"
+      metadata={{ level: form.level, grade: form.grade, topic: form.topic }}
+      userId={session?.user?.id}
+      onRefine={(prompt) => executeRun(prompt)}
+    >
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 12 }}>
         <Sel label="Level (optional)" value={form.level} onChange={handleLevelChange} options={Object.keys(CBC.levels)} />
         <Sel label="Grade (optional)" value={form.grade} onChange={v => updateForm('grade', v)} options={grades} />
         <Sel label="Learning Area (optional)" value={form.area} onChange={v => updateForm('area', v)} options={areas} />
       </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 12 }}>
+        <Txt label="Topic / Concept" value={form.topic} onChange={v => updateForm('topic', v)} placeholder="e.g. Properties of Matter…" req />
+        <Sel label="Assessment Type" value={form.assessment_type} onChange={v => updateForm('assessment_type', v)} options={assessmentTypes} />
+      </div>
+
+      <Txt label="Specific Outcomes to Assess (optional)" value={form.outcomes} onChange={v => updateForm('outcomes', v)} placeholder="e.g. Learner should be able to identify solids…" />
       
-      <Sel label="Assessment Type" value={form.type} onChange={v => updateForm('type', v)} options={CBC.assessmentTypes} req />
-      <Txt label="Topic / Concept" value={form.topic} onChange={v => updateForm('topic', v)} placeholder="e.g. Water Cycle, Fractions…" req />
-      <Txt label="Learning Outcomes (optional)" value={form.outcomes} onChange={v => updateForm('outcomes', v)} placeholder="e.g. Identify stages of the water cycle…" />
-      
-      <Btn onClick={submit} disabled={loading} color="#b45309">
-        {loading ? "Generating…" : "✅ Create Assessment Tool"}
+      <Btn onClick={submit} disabled={loading} color="#9333ea">
+        {loading ? "Generating…" : "📋 Create Assessment"}
       </Btn>
-      
-      {loading && !result && <Spinner msg={status || "Building your assessment tool…"} onTimeout={timeout} />}
-      {error && <ErrBox message={error} onRetry={retry} />}
-      
-      {result && (
-        <Result 
-          content={result} 
-          title="✅ Assessment Tool" 
-          isRefining={loading}
-            docType="lesson_plan"
-    metadata={{ level: form.level, grade: form.grade, topic: form.strand }}
-            userId={session?.user?.id}
-          onRefine={(promptText) => {
-            run("/api/generate/assessment", {
-              level: form.level || "Not specified",
-              grade: form.grade || "Not specified",
-              area: form.area || "Not specified",
-              type: form.type,
-              topic: form.topic,
-              outcomes: form.outcomes,
-              current_draft: result,         
-              refinement_prompt: promptText  
-            });
-          }}
-        />
-      )}
-    </div>
+    </GeneratorLayout>
   );
 }

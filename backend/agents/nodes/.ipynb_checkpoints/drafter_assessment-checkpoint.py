@@ -1,19 +1,10 @@
-import os
-from supabase import create_client, Client
-from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_core.runnables import RunnableConfig
 from agents.state import CopilotState
+from utils.rag import get_syllabus_context
 
-# 1. Initialize Supabase Connection
-supabase_url = os.environ.get("SUPABASE_URL")
-supabase_key = os.environ.get("SUPABASE_KEY")
-supabase: Client = create_client(supabase_url, supabase_key)
-
-# 2. Initialize the Embedding Model 
-embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-2-preview")
-
-# 3. Initialize the LLM Drafter
+# Initialize the LLM Drafter
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash", 
     temperature=0.2,
@@ -23,31 +14,10 @@ llm = ChatGoogleGenerativeAI(
 
 async def draft_assessment(state: CopilotState, config: RunnableConfig) -> dict:
     
-    # --- NEW: RETRIEVE KICD CONTEXT ---
+    # --- RETRIEVE KICD CONTEXT ---
     search_query = f"{state['grade']} {state['area']} {state['topic']}"
-    print(f"🔍 Searching KICD database for Assessment: {search_query}...")
+    syllabus_context = get_syllabus_context(search_query, "Lesson Plan")
     
-    try:
-        query_vector = embeddings.embed_query(search_query)
-        response = supabase.rpc(
-            "match_syllabus", 
-            {
-                "query_embedding": query_vector,
-                "match_count": 3
-            }
-        ).execute()
-        
-        if response.data:
-            syllabus_context = "\n\n".join([doc['content'] for doc in response.data])
-            print("✅ Found relevant KICD syllabus data for assessment!")
-        else:
-            syllabus_context = "No specific KICD syllabus context found. Proceed with general CBC best practices."
-            
-    except Exception as e:
-        print(f"⚠️ Search failed: {e}")
-        syllabus_context = "No specific KICD syllabus context found. Proceed with general CBC best practices."
-    # ----------------------------------
-
     # ─── REFINEMENT MODE ───
     if state.get("refinement_prompt") and state.get("current_draft"):
         system_msg = "You are a Kenya CBC curriculum editor."
