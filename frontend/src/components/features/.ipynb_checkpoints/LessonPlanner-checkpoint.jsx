@@ -32,7 +32,7 @@ export default function LessonPlanner({ session }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 12 }}>
         <Sel label="Level" value={form.level} onChange={handleLevelChange} options={Object.keys(CBC.levels)} req />
         <Sel label="Grade" value={form.grade} onChange={v => updateForm('grade', v)} options={grades} req />
         <Sel label="Learning Area" value={form.area} onChange={v => updateForm('area', v)} options={areas} req />

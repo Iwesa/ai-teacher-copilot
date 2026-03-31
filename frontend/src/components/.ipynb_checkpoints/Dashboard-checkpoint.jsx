@@ -5,7 +5,7 @@ import { Result } from './ui/SharedUI';
 export default function Dashboard({ session }) {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeDoc, setActiveDoc] = useState(null); // The document the user clicks to view
+  const [activeDoc, setActiveDoc] = useState(null);
 
   useEffect(() => {
     fetchDocuments();
@@ -17,7 +17,7 @@ export default function Dashboard({ session }) {
       const { data, error } = await supabase
         .from('documents')
         .select('*')
-        .eq('user_id', session.user.id) // Only get THIS user's documents
+        .eq('user_id', session.user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
