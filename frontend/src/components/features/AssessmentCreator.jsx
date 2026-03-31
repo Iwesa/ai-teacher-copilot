@@ -23,7 +23,7 @@ export default function AssessmentCreator({ session }) {
       grade: form.grade || "Not specified",
       area: form.area || "Not specified",
       topic: form.topic,
-      assessment_type: form.assessment_type,
+      type: form.assessment_type,
       outcomes: form.outcomes,
       current_draft: result,
       refinement_prompt: refinementPrompt
