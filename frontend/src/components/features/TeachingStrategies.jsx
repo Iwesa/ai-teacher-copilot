@@ -45,14 +45,13 @@ export default function TeachingStrategies({ session }) {
       
       {loading && <Spinner msg="Finding the best strategies…" onTimeout={timeout} />}
       {error && <ErrBox message={error} onRetry={retry} />}
-      {result && <Result content={result} title="🎯 Teaching Strategies" />}
         {result && (
         <Result 
           content={result} 
           title="🎯 Teaching Strategies" 
           isRefining={loading}
             docType="lesson_plan"
-            metadata={{ level: form.level, grade: form.grade, topic: form.strand }}
+            metadata={{ level: form.level, grade: form.grade, topic: form.topic }}
             userId={session?.user?.id}
           onRefine={(promptText) => {
             // Re-run the generation, passing the current content and the user's prompt
